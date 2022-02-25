@@ -20,8 +20,8 @@ $(warning using library $(LIBRARY))
 
 # -----------------------------------------------
 # EXPERIMENT AND MODEL IDENTIFIERS
-EXP_NAME = $(LIBRARY)_phi_std
-MODEL = $(LIBRARY)_phi
+EXP_NAME = $(LIBRARY)_ext
+MODEL = $(LIBRARY)_ext
 
 # -----------------------------------------------
 # FOLDERS & FILENAMES
@@ -43,7 +43,7 @@ TSV_FLD = $(BASE_OUT_FLD)/tsv_$(LIBRARY)
 RESULTS_FLD = $(EXP_FLD)/results
 
 # prefix
-REPORTS = reports_phi
+REPORTS = reports_ext
 
 # *** *** D O W N L O A D
 $(BASE_DS_FLD)/NLMCXR_png.tgz: 
@@ -65,13 +65,14 @@ download: | $(BASE_DS_FLD)/text $(BASE_DS_FLD)/image
 #
 REPORTS_RAW_TSV = $(TSV_FLD)/$(REPORTS)_raw.tsv
 REPORTS_TSV = $(EXP_FLD)/$(REPORTS).tsv
+
 PP_IMG_SIZE=300
 PREPROC_IMAGES = $(TSV_FLD)/images_$(PP_IMG_SIZE).pickle
+
 KEEP_N_TERMS = 100
-# number of tags (MeSH term) to keep per report
+# number of tags (MeSH term) to keep per report -- currently ignored
 N_TERMS_PER_REP = 4
 MIN_TERM_FREQ = 90
-
 # number of images to keep per report, 0 = all
 KEEP_N_IMGS = 0
 #! image size (square) expected by the CNN
@@ -88,7 +89,7 @@ $(REPORTS_RAW_TSV): A00_prepare_raw_tsv.py
 	$(PYTHON) A00_prepare_raw_tsv.py --txt_fld=$(TEXT_FLD) --img_fld=$(IMAGE_FLD) --out_file=$@ $(VERBOSITY_A) --stats
 
 # -----------------------------------------------
-$(EXP_FLD)/$(REPORTS).tsv: $(REPORTS_RAW_TSV) A01_prepare_tsv.py
+$(REPORTS_TSV): $(REPORTS_RAW_TSV) A01_prepare_tsv.py
 	@mkdir -p $(EXP_FLD)
 	$(PYTHON) A01_prepare_tsv.py --out_file=$@ --raw_tsv=$(REPORTS_RAW_TSV) \
 		--min_term_frequency=120 --n_terms=$(KEEP_N_TERMS) --n_terms_per_rep=$(N_TERMS_PER_REP) \
@@ -99,6 +100,7 @@ $(PREPROC_IMAGES):
 	$(PYTHON) A02_preprocess_images.py --out_fn=$@ \ 
 		--img_fld=$(IMAGE_FLD) --img_size=$(PP_IMG_SIZE) \
 		--verbose=False 
+
 # -----------------------------------------------
 process_raw_dataset : $(REPORTS_RAW_TSV)
 
@@ -111,6 +113,7 @@ A_pipeline: | process_raw_dataset reports_tsv
 A_pipeline_clean:
 	rm -f $(REPORTS_RAW_TSV) 
 	rm -f $(REPORTS_TSV)
+#rm -f $(PREPROC_IMAGES)
 	rmdir $(TSV_FLD)
 # not removing EXP_FLD
 
@@ -191,9 +194,8 @@ $(SPLIT_WITNESS): $(ENC_WITNESS) C00_split.py
 	@mv -f $@.tmp $@
 
 split_data: $(SPLIT_WITNESS)
-
 # -----------------------------------------------
-# softmax or sigmoid: LEAVE SOFTMAX
+# softmax or sigmoid:
 CNN_OUT_LAYER=sigmoid
 CNN_MODEL_OUT_FN = $(EXP_FLD)/cnn_$(CNN_OUT_LAYER)_eddl.onnx
 # the following without extension because several files are saved, with different exts
@@ -202,7 +204,6 @@ REC_MODEL_OUT_FN = $(EXP_FLD)/rnn_rec.onnx
 REC_MODEL_OUT_PRED_FN = $(subst .onnx,_pred.onnx,$(REC_MODEL_OUT_FN))
 REC_MODEL_OUT_FN_BIN = $(subst .onnx,.bin,$(REC_MODEL_OUT_FN))
 REC_MODEL_OUT_PRED_FN_BIN = $(subst .onnx,_pred.bin,$(REC_MODEL_OUT_FN))
-
 
 CHECK_VAL_EVERY_CNN=10
 CHECK_VAL_EVERY_RNN=20
@@ -241,7 +242,7 @@ REMOTE_LOG_RNN = True
 $(CNN_MODEL_OUT_FN): $(SPLIT_WITNESS) C01_1_cnn_mod_edll.py 
 	$(warning training target is $@)
 	$(PYTHON) C01_1_cnn_mod_edll.py train  --out_fn=$@ \
-		--preload_images=False --preproc_images=$(PREPROC_IMAGES) \
+		--preload_images=True --preproc_images=$(PREPROC_IMAGES) \
 		--cnn_out_layer=$(CNN_OUT_LAYER) \
 		--in_tsv=$(IMG_BASED_DS_ENC) --exp_fld=$(EXP_FLD)  \
 		--img_fld=$(IMAGE_FLD) --text_column=$(TEXT_COL) \
@@ -263,7 +264,7 @@ train_cnn_clean:
 # -----------------------------------------------
 $(REC_MODEL_OUT_FN): $(CNN_MODEL_OUT_FN) C01_2_rec_mod_edll.py
 	$(PYTHON)  C01_2_rec_mod_edll.py train --out_fn=$@ \
-		--preload_images=False --preproc_images=$(PREPROC_IMAGES) \
+		--preload_images=True --preproc_images=$(PREPROC_IMAGES) \
 		--cnn_file=$(CNN_MODEL_OUT_FN) \
 		--in_tsv=$(IMG_BASED_DS_ENC) --exp_fld=$(EXP_FLD) \
 		--img_fld=$(IMAGE_FLD) --term_column=$(TERM_COLUMN) --text_column=$(TEXT_COL) \
@@ -275,6 +276,7 @@ $(REC_MODEL_OUT_FN): $(CNN_MODEL_OUT_FN) C01_2_rec_mod_edll.py
 		--check_val_every=$(CHECK_VAL_EVERY_RNN) \
 		--remote_log=$(REMOVE_LOG_RNN) \
 		--verbose=$(VERBOSITY_C) --debug=$(DEBUG_C) --dev=$(DEV_MODE_C)
+# $(DEV_MODE_C)
 
 train_rec: $(REC_MODEL_OUT_FN)
 
@@ -324,6 +326,14 @@ cnn_classification_clean:
 	rm -f $(EXP_FLD)/cnn_classes.tsv
 
 D_pipeline_clean: | annotate_phi_clean cnn_classification_clean
+
+#
+# *** EXTENSIONS   E ***
+#
+
+cnn_ext:
+	$(PYTHON) E_cnn_ext.py --out_fn="cnn_ext.onnx" --exp_fld=$(EXP_FLD) --img_fld=$(IMAGE_FLD)\
+			--tsv_file=$(IMG_BASED_DS_ENC) --img_size=$(CNN_IMAGE_SIZE) --dev=False
 
 # *** ***
 all: train_rec

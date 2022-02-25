@@ -16,10 +16,8 @@ import pyeddl.eddl as eddl
 
 import text.reports as reports
 from text.encoding import SimpleCollator, StandardCollator
-
-
-# from C00_split import DataPartitioner
 from utils.data_partitioning  import DataPartitioner
+
 from utils.misc import Timer
 
 class Uc5Dataset:
@@ -123,7 +121,6 @@ class Uc5Dataset:
         self.preproc_augs = ecvl.SequentialAugmentationContainer([
             ecvl.AugRandomCrop([self.img_size, self.img_size])
         ])
-        
         ecvl.AugmentationParam.SetSeed(self.seed)
 
         self.preproc_images = None
@@ -230,7 +227,6 @@ class Uc5Dataset:
         if self.dev_grayscale:
             flags = flags=ecvl.ImReadMode.GRAYSCALE
         img = ecvl.ImRead(fn, flags=flags)  # , flags=ecvl.ImReadMode.GRAYSCALE)
-        ecvl.RearrangeChannels(img, img, "xyc")
         self.augs.Apply(img)
         ecvl.RearrangeChannels(img, img, "cxy")
         return img
@@ -239,10 +235,6 @@ class Uc5Dataset:
     def get_image(self, img_id):
         if self.preproc_images is not None:
             img = self.preproc_images[img_id]
-            #print(img.shape)
-            #img = img * 0.26261734
-            #img = img + 0.48197903
-            #img = img * 255
             img = ecvl.Image.fromarray(img, "cxy", ecvl.ColorType.RGB)
             ecvl.RearrangeChannels(img, img, "xyc")
             self.preproc_augs.Apply(img)
