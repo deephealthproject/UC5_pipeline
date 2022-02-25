@@ -162,7 +162,7 @@ class EddlRecurrentModule:
         start_train_t = time.perf_counter()
 
         for ei in range(n_epochs):
-            print(f"> epoch {ei+1}/{n_epochs}")
+            print(f">>> epoch {ei+1}/{n_epochs}")
             ds.last_batch = conf.last_batch
             ds.set_stage("train")
             ds.shuffle()
@@ -208,7 +208,7 @@ class EddlRecurrentModule:
             print(f"rnn expected training time (without early beaking): {H.precisedelta(expected_t)}")
 
 
-            if (ei+1) % 50 == 0 or conf.dev:
+            if False and ((ei+1) % 50 == 0 or conf.dev):
                 print("** generating text during training")
                 bleu, _ = self.predict(stage="valid")
                 self.run["trainin/bleu"].log(bleu, step=ei)
