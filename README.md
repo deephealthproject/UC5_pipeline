@@ -1,5 +1,6 @@
-# Project DEEPHEALTH
-## UC5 "Deep Image Annotation"
+
+# UC5 "Deep Image Annotation"
+## Project DEEPHEALTH
 
 Repository for the Use Case 5 "Deep Image Annotation" containing:
 - models based on the EDDL/ECVL libraries;
