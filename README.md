@@ -27,3 +27,7 @@ Previous models and PyTorch model can be found in the release "V1" available to 
 - For the experiments already defined in the jupyter notebooks at the item above, use the two makefiles `src/eddl/Makefile.mk` and `src/eddl/Makefile_MIMIC.mk` for, respectively, the IU-CHEST and the MIMIC-CXR datasets.
 
 Once configured an experiment, the correct sequence of the scripts is: `1_train_cnn.py`, `2_train_rnn.py`, `3_test_rnn.py`. 
+
+
+## CONTACT
+Franco Alberto Cardillo, ILC-CNR, `francoalberto.cardillo@ilc.cnr.it`
