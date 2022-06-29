@@ -6,7 +6,7 @@ Repository for the Use Case 5 "Deep Image Annotation" containing:
 - models based on the EDDL/ECVL libraries;
 - models based on the PyTorch-Lightning library.
 
-Previous models and PyTorch model can be found in the release "V1" available to download.
+Previous models and PyTorch model can be found in the release "v1_dev" available to download.
 
 ## FOLDER STRUCTURE
 
