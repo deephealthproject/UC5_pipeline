@@ -515,7 +515,7 @@ test_gru_2:
 
 # --------------------------
 
-# TEST BEFORE PUBLISHING THE FINAL CODE
+# TEST FOR THE DEMO
 
 final_train_cnn:
 	$(PYTHON) 1_train_cnn.py $(OUT_FLD)/final_exp --seed=$(SEED) --shuffle_seed=$(SHUFFLE_SEED) \
