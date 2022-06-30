@@ -1,3 +1,10 @@
+#
+# Project DeepHealth, UC5 "Deep Image Annotation"
+#
+# Franco Alberto Cardillo, ILC-CNR (UNITO) 
+# francoalberto.cardillo@ilc.cnr.it
+#
+
 from nltk import sent_tokenize, word_tokenize
 
 class Vocabulary:
