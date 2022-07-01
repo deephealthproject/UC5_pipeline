@@ -212,13 +212,15 @@ test_cnn_auto_50th:
 train_rnn_auto_50th:
 	$(PYTHON) 3_train_rnn.py $(OUT_FLD)/auto_50th --seed=$(SEED) --shuffle_seed=$(SHUFFLE_SEED) \
 		--n_epochs=2000 \
-		--description="RNN, auto, th 50, resnet, balanced on normal, no early break, finetune" \
+		--description="train_rnn_auto_50th, folder: auto_50th, RNN, auto, th 50, resnet, balanced on normal, no early break, finetune" \
 		--dataset_name=chest-iu \
-		--gpu_id=[0,0,1,0] \
+		--gpu_id=[0,0,0,1] \
 		--eddl_cs=gpu \
 		--bs=128 \
-		--early_break=False \
+		--early_break=True \
+		--eb_from_epoch=1000 \
 		--remote_log=True \
+		--dropout=0.2 \
 		--nodev
 
 test_rnn_auto_50th:
@@ -254,19 +256,20 @@ test_cnn_auto_50th_dropout:
 		--bs=256 \
 		--nodev
 
+#30/06/2022
 train_rnn_auto_50th_dropout:
-	$(PYTHON) 3_train_rnn.py $(OUT_FLD)/auto_50th_dropout --seed=$(SEED) --shuffle_seed=$(SHUFFLE_SEED) \
-		--n_epochs=1000 \
-		--description="RNN, dropout, auto, th 50, resnet, balanced on normal, no early break, finetune" \
+	$(PYTHON) 3_train_rnn.py $(OUT_FLD)/auto_50th --seed=$(SEED) --shuffle_seed=$(SHUFFLE_SEED) \
+		--n_epochs=1500 \
+		--description="train_rnn_auto_50th_dropout, folder: auto_50th, auto_50th_dropout, RNN, dropout, auto, th 50, resnet, balanced on normal, no early break, finetune" \
 		--dataset_name=chest-iu \
 		--gpu_id=[1,0,0,0] \
 		--eddl_cs=gpu \
-		--eddl_cs_mem=full_mem \
+		--eddl_cs_mem=mid_mem \
 		--bs=128 \
 		--early_break=True \
-		--eb_from_epoch=500 \
+		--eb_from_epoch=1000 \
 		--remote_log=True \
-		--dropout=0.5 \
+		--dropout=0.2 \
 		--nodev
 
 test_rnn_auto_50th_dropout:

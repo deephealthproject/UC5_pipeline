@@ -22,7 +22,7 @@ from training.augmentations import *
 import time
 
 def load_ecvl_dataset(filename, bs, augmentations, gpu):  
-    num_workers = 4 * nnz(gpu)  # 8 if nnz(gpu) == 1 else 4 * nnz(gpu)
+    num_workers = 16 * nnz(gpu)  # 8 if nnz(gpu) == 1 else 4 * nnz(gpu)
     # num_workers = 1 * nnz(gpu)
     print(f"--> using num workers = {num_workers}")
     dataset = ecvl.DLDataset(filename, batch_size=bs, augs=augmentations, 
